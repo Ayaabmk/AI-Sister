@@ -1,0 +1,1018 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chez Madeleine – AI Sisters</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --fuchsia:      #E91E8C;
+      --fuchsia-dark: #C2186F;
+      --fuchsia-glow: rgba(233,30,140,0.18);
+      --pink-light:   #FFD6E7;
+      --black:        #0D0D0D;
+      --gray-dark:    #111118;
+      --gray-mid:     #1E1E2E;
+      --gray-card:    #1A1A2A;
+      --gray-border:  rgba(233,30,140,0.25);
+      --white:        #FFFFFF;
+      --text-muted:   #9090b0;
+      --radius:       14px;
+      --shadow:       0 8px 32px rgba(0,0,0,0.4);
+      --shadow-pink:  0 4px 24px rgba(233,30,140,0.25);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      height: 100%;
+      overflow: hidden;
+      font-family: 'Inter', system-ui, sans-serif;
+      background: var(--gray-dark);
+      color: var(--white);
+    }
+
+    .deck { width: 100vw; height: 100vh; position: relative; }
+
+    .slide {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 3rem 5rem 5rem;
+      opacity: 0;
+      visibility: hidden;
+      transform: translateX(40px);
+      transition: opacity 0.4s ease, transform 0.4s ease, visibility 0.4s;
+      background: var(--gray-dark);
+      overflow: hidden;
+    }
+
+    .slide.active  { opacity: 1; visibility: visible; transform: translateX(0); }
+    .slide.prev    { transform: translateX(-40px); }
+
+    /* ── Grille de points décoratifs ── */
+    .slide::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image: radial-gradient(circle, rgba(233,30,140,0.08) 1px, transparent 1px);
+      background-size: 32px 32px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .slide > * { position: relative; z-index: 1; }
+
+    /* ── Slide lead (titre / conclusion) ── */
+    .slide.lead {
+      background: var(--black);
+      align-items: center;
+      text-align: center;
+      justify-content: center;
+      padding: 2rem;
+    }
+
+    .slide.lead::before {
+      background-image: radial-gradient(circle, rgba(233,30,140,0.1) 1px, transparent 1px);
+      background-size: 28px 28px;
+    }
+
+    .bg-art {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .lead-content { position: relative; z-index: 2; }
+
+    /* ── Logo AI Sisters SVG inline ── */
+    .ais-logo {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 1.5rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin-bottom: 2rem;
+      justify-content: center;
+    }
+
+    .ais-logo .star { color: var(--fuchsia); font-size: 1.2em; }
+    .ais-logo .ai   { color: var(--fuchsia); }
+    .ais-logo .sis  { color: var(--white); }
+
+    .lead h1 {
+      font-size: clamp(2.8rem, 6vw, 5rem);
+      font-weight: 800;
+      color: var(--white);
+      letter-spacing: -0.03em;
+      margin-bottom: 0.4rem;
+      line-height: 1.1;
+    }
+
+    .lead h1 span { color: var(--fuchsia); }
+
+    .lead .subtitle {
+      font-size: clamp(1rem, 2vw, 1.35rem);
+      color: var(--pink-light);
+      font-weight: 400;
+      margin-bottom: 1rem;
+    }
+
+    .lead .tagline {
+      font-style: italic;
+      font-size: 1.05rem;
+      color: var(--text-muted);
+      margin-top: 1.5rem;
+    }
+
+    .lead .pill {
+      display: inline-block;
+      background: var(--fuchsia-glow);
+      border: 1px solid var(--gray-border);
+      padding: 0.3rem 1.1rem;
+      border-radius: 999px;
+      font-size: 0.8rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--fuchsia);
+      margin-bottom: 1.5rem;
+    }
+
+    /* ── Headers ── */
+    .slide-header {
+      font-size: 0.68rem;
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+      color: var(--fuchsia);
+      margin-bottom: 0.6rem;
+      font-weight: 700;
+    }
+
+    h2 {
+      font-size: clamp(1.5rem, 2.8vw, 2.2rem);
+      font-weight: 700;
+      color: var(--white);
+      margin-bottom: 1.25rem;
+      line-height: 1.2;
+      letter-spacing: -0.02em;
+    }
+
+    h2 span { color: var(--fuchsia); }
+
+    h3 {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--pink-light);
+      margin-bottom: 0.5rem;
+    }
+
+    p.lead-text {
+      font-size: 1.05rem;
+      line-height: 1.75;
+      color: rgba(255,255,255,0.85);
+      margin-bottom: 0.85rem;
+    }
+
+    /* ── Cards ── */
+    .card {
+      background: var(--gray-card);
+      border: 1px solid var(--gray-border);
+      border-radius: var(--radius);
+      padding: 1.1rem 1.3rem;
+      box-shadow: var(--shadow);
+    }
+
+    .card-pink {
+      border-color: var(--fuchsia);
+      box-shadow: var(--shadow-pink);
+    }
+
+    /* ── Grille présentation ── */
+    .pres-layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4rem;
+      align-items: center;
+    }
+
+    .photo-slot { display: flex; justify-content: center; }
+
+    .photo-slot img {
+      width: 280px; height: 280px;
+      object-fit: cover;
+      border-radius: 50%;
+      border: 3px solid var(--fuchsia);
+      box-shadow: 0 0 0 8px var(--fuchsia-glow), var(--shadow-pink);
+    }
+
+    .photo-placeholder {
+      width: 280px; height: 280px;
+      border-radius: 50%;
+      border: 2px dashed var(--fuchsia);
+      background: var(--fuchsia-glow);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      color: var(--text-muted);
+      font-size: 0.82rem;
+      text-align: center;
+      gap: 0.5rem;
+    }
+
+    .photo-placeholder span { font-size: 2.5rem; }
+
+    /* ── Plan steps ── */
+    .plan-steps {
+      display: flex;
+      gap: 0;
+      margin-top: 1.25rem;
+      position: relative;
+    }
+
+    .plan-steps::before {
+      content: '';
+      position: absolute;
+      top: 28px;
+      left: calc(10% + 28px);
+      right: calc(10% + 28px);
+      height: 1px;
+      background: linear-gradient(90deg, var(--fuchsia), var(--pink-light), var(--fuchsia));
+      opacity: 0.4;
+    }
+
+    .plan-step {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.7rem;
+      text-align: center;
+      padding: 0 0.5rem;
+    }
+
+    .plan-step .num {
+      width: 56px; height: 56px;
+      border-radius: 50%;
+      background: var(--fuchsia-glow);
+      border: 2px solid var(--fuchsia);
+      color: var(--white);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.4rem;
+      box-shadow: var(--shadow-pink);
+      position: relative; z-index: 1;
+      flex-shrink: 0;
+    }
+
+    .plan-step .step-label {
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: var(--white);
+      line-height: 1.3;
+    }
+
+    .plan-step .step-sub {
+      font-size: 0.74rem;
+      color: var(--text-muted);
+    }
+
+    /* ── Two columns ── */
+    .columns {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+      align-items: center;
+    }
+
+    .col-text ul { list-style: none; font-size: 1rem; line-height: 2.1; }
+    .col-text ul li::before {
+      content: "→";
+      color: var(--fuchsia);
+      margin-right: 0.6rem;
+      font-weight: 700;
+    }
+
+    /* ── Feature cards ── */
+    .features {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.8rem;
+      margin-top: 0.75rem;
+    }
+
+    .feature-card {
+      background: var(--gray-card);
+      border: 1px solid var(--gray-border);
+      padding: 1rem 1.2rem;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+      font-size: 0.97rem;
+      font-weight: 500;
+      transition: border-color 0.2s;
+    }
+
+    .feature-card:hover { border-color: var(--fuchsia); }
+    .feature-card .icon { font-size: 1.5rem; flex-shrink: 0; }
+
+    .feature-card small { display: block; color: var(--text-muted); font-weight: 400; font-size: 0.82rem; margin-top: 0.15rem; }
+
+    /* ── Problem cards ── */
+    .prob-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.8rem;
+      margin-top: 0.75rem;
+    }
+
+    .prob-card {
+      background: var(--gray-card);
+      border: 1px solid rgba(233,30,140,0.15);
+      border-radius: var(--radius);
+      padding: 1rem 1.2rem;
+      display: flex; gap: 0.85rem; align-items: flex-start;
+    }
+
+    .prob-card .icon { font-size: 1.5rem; flex-shrink: 0; margin-top: 0.1rem; }
+    .prob-card strong { display: block; color: var(--white); font-size: 0.95rem; margin-bottom: 0.2rem; }
+    .prob-card small { color: var(--text-muted); font-size: 0.82rem; }
+
+    /* ── Blockquote ── */
+    blockquote {
+      margin-top: 1.25rem;
+      padding: 0.85rem 1.2rem;
+      border-left: 3px solid var(--fuchsia);
+      background: var(--fuchsia-glow);
+      border-radius: 0 var(--radius) var(--radius) 0;
+      font-size: 1.05rem;
+      font-weight: 500;
+      color: var(--pink-light);
+    }
+
+    /* ── Demo steps ── */
+    .demo-steps { display: flex; flex-direction: column; gap: 0.65rem; margin-top: 0.5rem; }
+
+    .demo-step {
+      display: flex; gap: 1rem; align-items: flex-start;
+      background: var(--gray-card);
+      border: 1px solid var(--gray-border);
+      padding: 0.8rem 1.1rem;
+      border-radius: 12px;
+    }
+
+    .demo-step .num {
+      width: 1.8rem; height: 1.8rem;
+      background: var(--fuchsia);
+      color: #fff;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.8rem; font-weight: 700; flex-shrink: 0;
+    }
+
+    .demo-step .msg { font-size: 0.93rem; line-height: 1.5; }
+    .demo-step .msg strong { color: var(--pink-light); }
+    .demo-step code {
+      font-family: "SF Mono", "Fira Code", monospace;
+      background: rgba(233,30,140,0.12);
+      border: 1px solid rgba(233,30,140,0.3);
+      padding: 0.1em 0.4em;
+      border-radius: 4px;
+      font-size: 0.86em;
+      color: var(--pink-light);
+    }
+
+    /* ── Results grid ── */
+    .rl-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 1rem;
+      margin-top: 0.5rem;
+    }
+
+    .rl-card {
+      background: var(--gray-card);
+      border: 1px solid var(--gray-border);
+      border-radius: var(--radius);
+      padding: 1.1rem 1.3rem;
+      box-shadow: var(--shadow);
+    }
+
+    .rl-card h3 { margin-bottom: 0.6rem; font-size: 0.92rem; }
+    .rl-card ul { list-style: none; font-size: 0.88rem; line-height: 1.9; color: rgba(255,255,255,0.8); }
+    .rl-card.green { border-color: rgba(60,200,100,0.35); }
+    .rl-card.green h3 { color: #6fdb8a; }
+    .rl-card.green ul li::before { content: "✓ "; color: #6fdb8a; font-weight: 700; }
+    .rl-card.orange { border-color: rgba(233,30,140,0.35); }
+    .rl-card.orange h3 { color: var(--pink-light); }
+    .rl-card.orange ul li::before { content: "◦ "; color: var(--fuchsia); font-weight: 700; }
+    .rl-card.blue { border-color: rgba(100,140,255,0.35); }
+    .rl-card.blue h3 { color: #a0c0ff; }
+    .rl-card.blue ul li::before { content: "→ "; color: #6a9fff; font-weight: 700; }
+
+    /* ── Code block ── */
+    pre.code-block {
+      background: #0a0a12;
+      border: 1px solid var(--gray-border);
+      color: #c8d0e8;
+      padding: 1.1rem 1.4rem;
+      border-radius: var(--radius);
+      font-family: "SF Mono", "Fira Code", monospace;
+      font-size: 0.78rem;
+      line-height: 1.65;
+      box-shadow: var(--shadow);
+      white-space: pre;
+      overflow-x: auto;
+    }
+
+    pre.code-block .c-pink { color: var(--fuchsia); }
+    pre.code-block .c-light { color: var(--pink-light); }
+
+    /* ── Nav ── */
+    .nav-bar {
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      height: 52px;
+      background: rgba(10,10,18,0.92);
+      backdrop-filter: blur(14px);
+      border-top: 1px solid var(--gray-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 1.5rem;
+      z-index: 100;
+    }
+
+    .nav-btn {
+      background: var(--fuchsia);
+      color: #fff;
+      border: none;
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 1rem;
+      display: flex; align-items: center; justify-content: center;
+      transition: background 0.2s, transform 0.15s;
+    }
+
+    .nav-btn:hover { background: var(--fuchsia-dark); transform: scale(1.08); }
+    .nav-btn:disabled { opacity: 0.3; cursor: default; transform: none; }
+
+    .slide-counter { font-size: 0.85rem; color: var(--text-muted); font-variant-numeric: tabular-nums; }
+
+    .progress-track { position: fixed; top: 0; left: 0; right: 0; height: 3px; background: rgba(255,255,255,0.07); z-index: 100; }
+    .progress-fill  { height: 100%; background: linear-gradient(90deg, var(--fuchsia), var(--pink-light)); transition: width 0.35s ease; }
+
+    .brand-corner {
+      position: fixed; top: 1rem; right: 1.5rem;
+      display: flex; align-items: center; gap: 0.4rem;
+      font-size: 0.8rem; font-weight: 700;
+      z-index: 50; letter-spacing: -0.01em;
+    }
+
+    .brand-corner .star { color: var(--fuchsia); }
+    .brand-corner .ai   { color: var(--fuchsia); }
+    .brand-corner .sis  { color: var(--white); opacity: 0.7; }
+
+    .hint {
+      position: fixed; bottom: 62px; left: 50%;
+      transform: translateX(-50%);
+      font-size: 0.7rem; color: var(--text-muted); opacity: 0.5;
+      z-index: 50; white-space: nowrap;
+    }
+
+    @media (max-width: 768px) {
+      .slide { padding: 1.5rem 1.5rem 5rem; }
+      .columns, .features, .rl-grid, .pres-layout, .prob-grid { grid-template-columns: 1fr; }
+      .plan-steps { flex-direction: column; }
+      .plan-steps::before { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="progress-track"><div class="progress-fill" id="progress"></div></div>
+
+<!-- Logo AI Sisters en haut à droite -->
+<div class="brand-corner">
+  <span class="star">✦</span>
+  <span class="ai">AI</span><span class="sis">Sisters</span>
+</div>
+
+<div class="hint">← → ou Espace · F pour plein écran</div>
+
+<div class="deck" id="deck">
+
+  <!-- ══ Slide 1 — Titre ══ -->
+  <section class="slide lead active" data-slide="1">
+
+    <svg class="bg-art" viewBox="0 0 1200 700" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
+      <!-- Halos fuchsia -->
+      <radialGradient id="g1" cx="20%" cy="80%" r="45%">
+        <stop offset="0%" stop-color="#E91E8C" stop-opacity="0.18"/>
+        <stop offset="100%" stop-color="#E91E8C" stop-opacity="0"/>
+      </radialGradient>
+      <radialGradient id="g2" cx="80%" cy="20%" r="40%">
+        <stop offset="0%" stop-color="#E91E8C" stop-opacity="0.12"/>
+        <stop offset="100%" stop-color="#E91E8C" stop-opacity="0"/>
+      </radialGradient>
+      <rect width="1200" height="700" fill="url(#g1)"/>
+      <rect width="1200" height="700" fill="url(#g2)"/>
+      <!-- Cercles concentriques -->
+      <circle cx="600" cy="350" r="220" fill="none" stroke="#E91E8C" stroke-width="1" opacity="0.12"/>
+      <circle cx="600" cy="350" r="310" fill="none" stroke="#E91E8C" stroke-width="0.5" opacity="0.07"/>
+      <circle cx="600" cy="350" r="400" fill="none" stroke="#E91E8C" stroke-width="0.5" opacity="0.05"/>
+      <!-- Étoiles -->
+      <text x="80"  y="120" font-size="10" fill="#E91E8C" opacity="0.6">✦</text>
+      <text x="300" y="60"  font-size="7"  fill="#FFD6E7" opacity="0.4">✦</text>
+      <text x="900" y="80"  font-size="12" fill="#E91E8C" opacity="0.5">✦</text>
+      <text x="1100" y="180" font-size="8" fill="#FFD6E7" opacity="0.35">✦</text>
+      <text x="150" y="580" font-size="9" fill="#E91E8C" opacity="0.4">✦</text>
+      <text x="1050" y="600" font-size="11" fill="#FFD6E7" opacity="0.3">✦</text>
+      <text x="500" y="650" font-size="7" fill="#E91E8C" opacity="0.3">✦</text>
+      <!-- Lignes diagonales -->
+      <line x1="0" y1="700" x2="400" y2="0" stroke="#E91E8C" stroke-width="0.5" opacity="0.06"/>
+      <line x1="1200" y1="700" x2="800" y2="0" stroke="#E91E8C" stroke-width="0.5" opacity="0.06"/>
+    </svg>
+
+    <div class="lead-content">
+      <div class="ais-logo">
+        <span class="star">✦</span>
+        <span class="ai">AI</span><span class="sis">Sisters</span>
+      </div>
+      <div class="pill">Projet IA · 2026</div>
+      <h1>🥐 Chez <span>Madeleine</span></h1>
+      <p class="subtitle">Assistant Boulangerie IA</p>
+      <p class="tagline">Moins d'admin, plus de croissants.</p>
+    </div>
+  </section>
+
+  <!-- ══ Slide 2 — Présentation ══ -->
+  <section class="slide" data-slide="2">
+    <div class="slide-header">Présentation</div>
+    <div class="pres-layout">
+      <div class="col-text">
+        <h2>Bonjour <span>👋</span></h2>
+        <p class="lead-text">
+          Je m'appelle <strong style="color:var(--pink-light)">Ben Mabrouk Aya</strong> et je vous présente
+          <strong style="color:var(--fuchsia)">Chez Madeleine</strong>,
+          un agent IA conversationnel conçu dans le cadre d'<strong style="color:var(--fuchsia)">AI Sisters</strong>.
+        </p>
+        <p class="lead-text" style="font-size:0.97rem;">
+          L'idée : aider une <strong>boulangère artisanale</strong> à gérer son commerce
+          au quotidien, en langage naturel, sans interface complexe.
+        </p>
+        <blockquote>
+          « Madeleine parle. L'agent agit. »
+        </blockquote>
+      </div>
+     
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ Slide 3 — Plan ══ -->
+  <section class="slide" data-slide="3">
+    <div class="slide-header">Sommaire</div>
+    <h2>Plan de la <span>présentation</span></h2>
+    <div class="plan-steps">
+      <div class="plan-step">
+        <div class="num">🏠</div>
+        <div class="step-label">Contexte</div>
+        <div class="step-sub">Madeleine & sa boulangerie</div>
+      </div>
+      <div class="plan-step">
+        <div class="num">❓</div>
+        <div class="step-label">Problème</div>
+        <div class="step-sub">Freins au quotidien</div>
+      </div>
+      <div class="plan-step">
+        <div class="num">💡</div>
+        <div class="step-label">Solution</div>
+        <div class="step-sub">L'agent IA & son architecture</div>
+      </div>
+      <div class="plan-step">
+        <div class="num">🖥️</div>
+        <div class="step-label">Démo</div>
+        <div class="step-sub">4 scénarios en live</div>
+      </div>
+      <div class="plan-step">
+        <div class="num">📊</div>
+        <div class="step-label">Résultats & limites</div>
+        <div class="step-sub">Bilan & axes d'amélioration</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ Slide 4 — Contexte ══ -->
+  <section class="slide" data-slide="4">
+    <div class="slide-header">Contexte</div>
+    <div class="columns">
+      <div class="col-text">
+        <h2>Madeleine <span>Croûton</span></h2>
+        <ul>
+          <li>Boulangère depuis <strong>32 ans</strong> à Saint-Germain-des-Croissants</li>
+          <li>Gère seule : stocks, commandes, production, ventes</li>
+          <li>Données dans <strong style="color:var(--fuchsia)">Notion</strong> — 4 bases (stocks, catalogue, ventes, commandes)</li>
+          <li>Commandes fournisseurs : emails <strong>rédigés à la main</strong></li>
+          <li>Production du lendemain : basée sur l'<strong>intuition</strong></li>
+        </ul>
+      </div>
+      <div style="display:flex;justify-content:center;align-items:center;">
+        <!-- Boulangerie illustration — palette adaptée au thème sombre -->
+        <svg viewBox="0 0 320 280" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:360px;height:auto;filter:drop-shadow(0 8px 32px rgba(233,30,140,0.2))">
+          <!-- Fond nuit -->
+          <rect width="320" height="280" fill="#12121e" rx="14"/>
+          <!-- Bâtiment -->
+          <rect x="20" y="110" width="280" height="150" fill="#1e1530"/>
+          <!-- Auvent fuchsia -->
+          <path d="M10,110 L160,74 L310,110 Z" fill="#E91E8C"/>
+          <!-- Rayures auvent -->
+          <path d="M55,110 L120,88 M105,110 L168,86 M155,110 L215,86 M205,110 L262,90 M255,110 L302,102" stroke="rgba(255,214,231,0.35)" stroke-width="5" stroke-linecap="round"/>
+          <!-- Frange -->
+          <path d="M10,110 Q17,120 24,110 Q31,120 38,110 Q45,120 52,110 Q59,120 66,110 Q73,120 80,110 Q87,120 94,110 Q101,120 108,110 Q115,120 122,110 Q129,120 136,110 Q143,120 150,110 Q157,120 164,110 Q171,120 178,110 Q185,120 192,110 Q199,120 206,110 Q213,120 220,110 Q227,120 234,110 Q241,120 248,110 Q255,120 262,110 Q269,120 276,110 Q283,120 290,110 Q297,120 304,110 Q310,118 310,110" fill="none" stroke="#c2186f" stroke-width="2"/>
+          <!-- Enseigne -->
+          <rect x="72" y="118" width="176" height="28" fill="#0D0D0D" rx="5"/>
+          <rect x="74" y="120" width="172" height="24" fill="#110a16" rx="4"/>
+          <!-- Glow enseigne -->
+          <rect x="74" y="120" width="172" height="24" fill="none" rx="4" stroke="#E91E8C" stroke-width="1" opacity="0.6"/>
+          <text x="160" y="136" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="11.5" fill="#FFD6E7" font-weight="700" letter-spacing="1">Chez Madeleine</text>
+          <!-- Vitrine lumineuse (warm light) -->
+          <rect x="44" y="158" width="232" height="82" fill="#2a1e10" rx="6" stroke="#E91E8C" stroke-width="1.5" opacity="0.7"/>
+          <rect x="46" y="160" width="228" height="78" fill="#251808" rx="5"/>
+          <!-- Glow intérieur vitrine -->
+          <radialGradient id="wg" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="#c8802a" stop-opacity="0.18"/>
+            <stop offset="100%" stop-color="#c8802a" stop-opacity="0"/>
+          </radialGradient>
+          <rect x="46" y="160" width="228" height="78" fill="url(#wg)" rx="5"/>
+          <!-- Croisillons -->
+          <line x1="160" y1="160" x2="160" y2="238" stroke="#E91E8C" stroke-width="1" opacity="0.4"/>
+          <line x1="46" y1="199" x2="274" y2="199" stroke="#E91E8C" stroke-width="1" opacity="0.4"/>
+          <!-- Baguettes -->
+          <g transform="translate(100,178) rotate(-22)"><ellipse cx="0" cy="0" rx="46" ry="9" fill="#c8802a"/><line x1="-36" y1="-3" x2="36" y2="3" stroke="#a06010" stroke-width="2" stroke-dasharray="7,4"/></g>
+          <!-- Pain rond -->
+          <ellipse cx="218" cy="177" rx="21" ry="17" fill="#b8660a"/>
+          <path d="M200,170 Q218,159 236,170" fill="none" stroke="#d4920a" stroke-width="1.5"/>
+          <path d="M198,178 Q218,166 238,178" fill="none" stroke="#d4920a" stroke-width="1"/>
+          <!-- Croissant bas gauche -->
+          <path d="M65,225 C70,207 88,200 108,210 C117,215 115,228 108,233 C88,241 67,236 65,225 Z" fill="#d4956a"/>
+          <path d="M67,220 C74,206 93,201 111,211" fill="none" stroke="#E91E8C" stroke-width="1.5" opacity="0.7"/>
+          <!-- Tarte bas droite -->
+          <circle cx="212" cy="222" r="18" fill="#c8802a"/>
+          <circle cx="212" cy="222" r="12" fill="#e8a040"/>
+          <circle cx="212" cy="222" r="6" fill="#E91E8C" opacity="0.85"/>
+          <!-- Porte -->
+          <rect x="128" y="218" width="64" height="42" fill="#0a0a14" rx="5"/>
+          <rect x="131" y="221" width="58" height="36" fill="#110a1e" rx="3"/>
+          <rect x="137" y="227" width="46" height="22" fill="rgba(233,30,140,0.15)" rx="2"/>
+          <rect x="137" y="227" width="46" height="22" fill="none" rx="2" stroke="#E91E8C" stroke-width="0.8" opacity="0.5"/>
+          <circle cx="183" cy="238" r="3" fill="#E91E8C"/>
+          <!-- Pots fleurs lumineux -->
+          <rect x="22" y="244" width="24" height="16" fill="#1a1a2a" rx="3"/>
+          <circle cx="34" cy="242" r="13" fill="#1e3020"/>
+          <circle cx="28" cy="236" r="5.5" fill="#E91E8C" opacity="0.9"/>
+          <circle cx="40" cy="237" r="5" fill="#ff4488" opacity="0.9"/>
+          <circle cx="34" cy="232" r="5" fill="#ff2277" opacity="0.85"/>
+          <rect x="274" y="244" width="24" height="16" fill="#1a1a2a" rx="3"/>
+          <circle cx="286" cy="242" r="13" fill="#1e3020"/>
+          <circle cx="280" cy="236" r="5.5" fill="#E91E8C" opacity="0.9"/>
+          <circle cx="292" cy="237" r="5" fill="#ff4488" opacity="0.9"/>
+          <circle cx="286" cy="232" r="5" fill="#ff2277" opacity="0.85"/>
+          <!-- Sol -->
+          <rect x="0" y="263" width="320" height="17" fill="#0f0f1a" rx="0 0 14 14"/>
+          <ellipse cx="60" cy="266" rx="22" ry="4" fill="rgba(233,30,140,0.1)"/>
+          <ellipse cx="160" cy="268" rx="26" ry="4" fill="rgba(233,30,140,0.08)"/>
+          <ellipse cx="260" cy="266" rx="20" ry="4" fill="rgba(233,30,140,0.1)"/>
+          <!-- Étoiles -->
+          <text x="260" y="50" font-size="10" fill="#E91E8C" opacity="0.7">✦</text>
+          <text x="40" y="70" font-size="7" fill="#FFD6E7" opacity="0.5">✦</text>
+          <text x="290" y="95" font-size="6" fill="#FFD6E7" opacity="0.4">✦</text>
+          <circle cx="200" cy="35" r="2" fill="#FFD6E7" opacity="0.6"/>
+          <circle cx="120" cy="50" r="1.5" fill="#FFD6E7" opacity="0.4"/>
+          <circle cx="280" cy="65" r="1" fill="#fff" opacity="0.5"/>
+        </svg>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ Slide 5 — Problème ══ -->
+  <section class="slide" data-slide="5">
+    <div class="slide-header">Problème</div>
+    <h2>Ce qui <span>freine</span> Madeleine</h2>
+    <div class="prob-grid">
+      <div class="prob-card">
+        <span class="icon">⏱️</span>
+        <div><strong>Temps perdu</strong><small>Emails de commande rédigés à la main, un par un</small></div>
+      </div>
+      <div class="prob-card">
+        <span class="icon">🔀</span>
+        <div><strong>Données éparpillées</strong><small>4 bases Notion sans lien entre elles</small></div>
+      </div>
+      <div class="prob-card">
+        <span class="icon">🤔</span>
+        <div><strong>Production à l'intuition</strong><small>Risque de gaspillage ou de rupture</small></div>
+      </div>
+      <div class="prob-card">
+        <span class="icon">🚨</span>
+        <div><strong>Alertes stocks manquées</strong><small>Ruptures découvertes trop tard</small></div>
+      </div>
+    </div>
+    <blockquote>
+      Comment connecter ces outils existants et répondre en <strong>langage naturel</strong>,
+      sans que Madeleine apprenne une nouvelle interface ?
+    </blockquote>
+  </section>
+
+  <!-- ══ Slide 6 — Solution ══ -->
+  <section class="slide" data-slide="6">
+    <div class="slide-header">Solution</div>
+    <h2>L'agent <span>IA</span> Chez Madeleine</h2>
+    <div class="columns" style="gap:2.5rem;align-items:start;">
+      <div>
+        <p class="lead-text" style="font-size:0.97rem;margin-bottom:0.85rem;">Un <strong style="color:var(--pink-light)">agent conversationnel</strong> branché sur les outils existants :</p>
+        <div style="display:flex;flex-direction:column;gap:0.65rem;">
+          <div class="feature-card"><span class="icon">📦</span><div><strong>consulter_stocks</strong><small>Niveaux, alertes, fournisseurs — Notion</small></div></div>
+          <div class="feature-card"><span class="icon">📊</span><div><strong>consulter_ventes</strong><small>Tendances, best-sellers — Notion</small></div></div>
+          <div class="feature-card"><span class="icon">📧</span><div><strong>envoyer_commande</strong><small>Email SMTP + trace Notion (double action)</small></div></div>
+          <div class="feature-card"><span class="icon">🔮</span><div><strong>prevoir_production</strong><small>Historique × coeff. jour × météo</small></div></div>
+        </div>
+      </div>
+      <div>
+        <p style="font-size:0.7rem;text-transform:uppercase;letter-spacing:.12em;color:var(--fuchsia);font-weight:700;margin-bottom:.7rem;">Architecture</p>
+        <pre class="code-block"><span class="c-light">Madeleine</span> (Chainlit / CLI)
+         │
+    ┌────▼──────────────────┐
+    │  <span class="c-pink">Agent LangGraph</span>        │
+    │  Llama 3.3 70B · Groq │
+    │  <span class="c-light">Think → Act → Observe</span>  │
+    └──┬───┬────┬───────────┘
+       │   │    │   └── 📧 Email + Notion
+    📦  📊  🔮
+    Notion Notion Notion+météo</pre>
+        <p style="font-size:0.78rem;color:var(--text-muted);margin-top:.7rem;">Règle d'or : l'agent <strong style="color:var(--pink-light)">ne devine jamais</strong> — il appelle toujours un outil.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ Slide 7 — Diagramme ══ -->
+  <section class="slide" data-slide="7">
+    <div class="slide-header">Architecture</div>
+    <h2>Comment <span>ça marche</span> — cycle ReAct</h2>
+    <div style="display:flex;justify-content:center;align-items:center;margin-top:0.5rem;">
+      <svg viewBox="0 0 860 390" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:860px;height:auto;">
+        <defs>
+          <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0,1 L9,5 L0,9 Z" fill="#E91E8C"/>
+          </marker>
+          <marker id="arr2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M0,1 L9,5 L0,9 Z" fill="rgba(233,30,140,0.45)"/>
+          </marker>
+          <filter id="glow-f">
+            <feGaussianBlur stdDeviation="3" result="blur"/>
+            <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
+        </defs>
+
+        <!-- ── Utilisateur ── -->
+        <rect x="355" y="8" width="150" height="44" rx="22" fill="#1A1A2A" stroke="#E91E8C" stroke-width="1.5"/>
+        <text x="430" y="35" text-anchor="middle" font-family="Inter,sans-serif" font-size="13" font-weight="700" fill="#FFD6E7">👩‍💼 Madeleine</text>
+
+        <!-- flèche user → interface -->
+        <line x1="430" y1="52" x2="430" y2="76" stroke="#E91E8C" stroke-width="1.5" marker-end="url(#arr)"/>
+
+        <!-- ── Interface ── -->
+        <rect x="290" y="78" width="280" height="40" rx="10" fill="#1A1A2A" stroke="rgba(233,30,140,0.4)" stroke-width="1.2"/>
+        <text x="430" y="103" text-anchor="middle" font-family="Inter,sans-serif" font-size="11.5" fill="#9090b0">🖥️ Chainlit (web)  ·  CLI (terminal)</text>
+
+        <!-- flèche interface → agent -->
+        <line x1="430" y1="118" x2="430" y2="142" stroke="#E91E8C" stroke-width="1.5" marker-end="url(#arr)"/>
+
+        <!-- ── Agent LangGraph ── -->
+        <rect x="160" y="144" width="540" height="108" rx="14" fill="#12071a" stroke="#E91E8C" stroke-width="2" filter="url(#glow-f)"/>
+        <text x="430" y="168" text-anchor="middle" font-family="Inter,sans-serif" font-size="13" font-weight="700" fill="#E91E8C">Agent LangGraph — Pattern ReAct</text>
+        <text x="430" y="186" text-anchor="middle" font-family="Inter,sans-serif" font-size="11" fill="#9090b0">Llama 3.3 70B · Groq  ·  System prompt personnalisé</text>
+
+        <!-- ReAct boucle interne -->
+        <rect x="228" y="196" width="100" height="32" rx="8" fill="rgba(233,30,140,0.12)" stroke="rgba(233,30,140,0.4)" stroke-width="1"/>
+        <text x="278" y="217" text-anchor="middle" font-family="Inter,sans-serif" font-size="11" font-weight="600" fill="#FFD6E7">🧠 Think</text>
+        <rect x="380" y="196" width="100" height="32" rx="8" fill="rgba(233,30,140,0.12)" stroke="rgba(233,30,140,0.4)" stroke-width="1"/>
+        <text x="430" y="217" text-anchor="middle" font-family="Inter,sans-serif" font-size="11" font-weight="600" fill="#FFD6E7">⚡ Act</text>
+        <rect x="532" y="196" width="100" height="32" rx="8" fill="rgba(233,30,140,0.12)" stroke="rgba(233,30,140,0.4)" stroke-width="1"/>
+        <text x="582" y="217" text-anchor="middle" font-family="Inter,sans-serif" font-size="11" font-weight="600" fill="#FFD6E7">👁 Observe</text>
+        <!-- flèches boucle -->
+        <line x1="328" y1="212" x2="378" y2="212" stroke="#E91E8C" stroke-width="1.2" marker-end="url(#arr)"/>
+        <line x1="480" y1="212" x2="530" y2="212" stroke="#E91E8C" stroke-width="1.2" marker-end="url(#arr)"/>
+        <path d="M632,212 Q680,212 680,236 Q680,260 430,260 Q180,260 180,236 Q180,212 228,212" fill="none" stroke="rgba(233,30,140,0.3)" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#arr2)"/>
+
+        <!-- flèches agent → tools -->
+        <line x1="240" y1="252" x2="100" y2="300" stroke="rgba(233,30,140,0.5)" stroke-width="1.2" marker-end="url(#arr2)"/>
+        <line x1="320" y1="252" x2="248" y2="300" stroke="rgba(233,30,140,0.5)" stroke-width="1.2" marker-end="url(#arr2)"/>
+        <line x1="430" y1="252" x2="430" y2="300" stroke="rgba(233,30,140,0.5)" stroke-width="1.2" marker-end="url(#arr2)"/>
+        <line x1="540" y1="252" x2="608" y2="300" stroke="rgba(233,30,140,0.5)" stroke-width="1.2" marker-end="url(#arr2)"/>
+        <line x1="620" y1="252" x2="760" y2="300" stroke="rgba(233,30,140,0.5)" stroke-width="1.2" marker-end="url(#arr2)"/>
+
+        <!-- ── 5 Tools ── -->
+        <!-- Tool 1 -->
+        <rect x="18" y="302" width="160" height="52" rx="10" fill="#1A1A2A" stroke="rgba(233,30,140,0.35)" stroke-width="1.2"/>
+        <text x="98" y="322" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" font-weight="700" fill="#FFD6E7">📦 consulter_stocks</text>
+        <text x="98" y="338" text-anchor="middle" font-family="Inter,sans-serif" font-size="9.5" fill="#9090b0">Notion · Ingrédients</text>
+        <text x="98" y="350" text-anchor="middle" font-family="Inter,sans-serif" font-size="9" fill="#606080">niveaux · alertes · fournisseurs</text>
+
+        <!-- Tool 2 -->
+        <rect x="188" y="302" width="160" height="52" rx="10" fill="#1A1A2A" stroke="rgba(233,30,140,0.35)" stroke-width="1.2"/>
+        <text x="268" y="322" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" font-weight="700" fill="#FFD6E7">🥖 consulter_catalogue</text>
+        <text x="268" y="338" text-anchor="middle" font-family="Inter,sans-serif" font-size="9.5" fill="#9090b0">Notion · Produits</text>
+        <text x="268" y="350" text-anchor="middle" font-family="Inter,sans-serif" font-size="9" fill="#606080">prix · coûts · marges</text>
+
+        <!-- Tool 3 -->
+        <rect x="358" y="302" width="144" height="52" rx="10" fill="#1A1A2A" stroke="rgba(233,30,140,0.35)" stroke-width="1.2"/>
+        <text x="430" y="322" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" font-weight="700" fill="#FFD6E7">📊 consulter_ventes</text>
+        <text x="430" y="338" text-anchor="middle" font-family="Inter,sans-serif" font-size="9.5" fill="#9090b0">Notion · Historique</text>
+        <text x="430" y="350" text-anchor="middle" font-family="Inter,sans-serif" font-size="9" fill="#606080">tendances · best-sellers</text>
+
+        <!-- Tool 4 -->
+        <rect x="512" y="302" width="180" height="52" rx="10" fill="#1A1A2A" stroke="#E91E8C" stroke-width="1.5"/>
+        <text x="602" y="320" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" font-weight="700" fill="#E91E8C">📧 envoyer_commande</text>
+        <text x="602" y="336" text-anchor="middle" font-family="Inter,sans-serif" font-size="9.5" fill="#9090b0">SMTP → email fournisseur</text>
+        <text x="602" y="350" text-anchor="middle" font-family="Inter,sans-serif" font-size="9" fill="#606080">+ trace Notion (double action)</text>
+
+        <!-- Tool 5 -->
+        <rect x="702" y="302" width="140" height="52" rx="10" fill="#1A1A2A" stroke="rgba(233,30,140,0.35)" stroke-width="1.2"/>
+        <text x="772" y="322" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" font-weight="700" fill="#FFD6E7">🔮 prevoir_production</text>
+        <text x="772" y="338" text-anchor="middle" font-family="Inter,sans-serif" font-size="9.5" fill="#9090b0">historique × coeff. jour</text>
+        <text x="772" y="350" text-anchor="middle" font-family="Inter,sans-serif" font-size="9" fill="#606080">× météo OpenWeatherMap</text>
+
+        <!-- Légende -->
+        <rect x="18" y="368" width="12" height="12" rx="3" fill="none" stroke="#E91E8C" stroke-width="1.5"/>
+        <text x="36" y="379" font-family="Inter,sans-serif" font-size="9.5" fill="#9090b0">Tool clé (double action)</text>
+        <rect x="180" y="368" width="12" height="12" rx="3" fill="none" stroke="rgba(233,30,140,0.35)" stroke-width="1.2"/>
+        <text x="198" y="379" font-family="Inter,sans-serif" font-size="9.5" fill="#9090b0">Tool Notion (lecture seule)</text>
+        <circle cx="366" cy="374" r="5" fill="#E91E8C" opacity="0.2" stroke="#E91E8C" stroke-width="1"/>
+        <text x="378" y="379" font-family="Inter,sans-serif" font-size="9.5" fill="#9090b0">Boucle ReAct (Think → Act → Observe)</text>
+      </svg>
+    </div>
+  </section>
+
+  <!-- ══ Slide 8 — Démo ══ -->
+  <section class="slide" data-slide="7">
+    <div class="slide-header">Démonstration</div>
+    <h2>Démo <span>live</span> — 4 scénarios</h2>
+    <div class="demo-steps">
+      <div class="demo-step">
+        <div class="num">1</div>
+        <div class="msg"><strong>Stock bas</strong> — <code>« Il me reste combien de beurre ? »</code><br>
+        <small style="color:var(--text-muted)">→ L'agent lit Notion, détecte l'alerte, propose une commande</small></div>
+      </div>
+      <div class="demo-step">
+        <div class="num">2</div>
+        <div class="msg"><strong>Commande fournisseur</strong> — <code>« Oui, commande 30 kg »</code><br>
+        <small style="color:var(--text-muted)">→ Email SMTP envoyé + ligne créée dans Notion (statut : Envoyée)</small></div>
+      </div>
+      <div class="demo-step">
+        <div class="num">3</div>
+        <div class="msg"><strong>Analyse ventes</strong> — <code>« Combien de croissants la semaine dernière ? »</code><br>
+        <small style="color:var(--text-muted)">→ Agrégation historique Notion, totaux + meilleur jour</small></div>
+      </div>
+      <div class="demo-step">
+        <div class="num">4</div>
+        <div class="msg"><strong>Prévision production</strong> — <code>« Qu'est-ce que je dois préparer demain ? »</code><br>
+        <small style="color:var(--text-muted)">→ Tableau produit par produit : moy. 14j × coeff jour × météo</small></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ Slide 8 — Résultats & Limites ══ -->
+  <section class="slide" data-slide="8">
+    <div class="slide-header">Bilan</div>
+    <h2>Résultats, limites & <span>axes d'amélioration</span></h2>
+    <div class="rl-grid">
+      <div class="rl-card green">
+        <h3>✅ Ce qui marche</h3>
+        <ul>
+          <li>Réponses 100 % fondées sur les données Notion</li>
+          <li>Double action email + traçabilité</li>
+          <li>Prévisions avec coeff. jour et météo</li>
+          <li>Mode simulation si SMTP non configuré</li>
+          <li>Interface chat fluide (Chainlit)</li>
+        </ul>
+      </div>
+      <div class="rl-card orange">
+        <h3>⚠️ Limites actuelles</h3>
+        <ul>
+          <li>Historique en mémoire vive (volatile)</li>
+          <li>Pas d'authentification multi-utilisateur</li>
+          <li>Prévisions sans jours fériés</li>
+          <li>Pas d'alertes proactives stocks bas</li>
+        </ul>
+      </div>
+      <div class="rl-card blue">
+        <h3>🚀 Axes d'amélioration</h3>
+        <ul>
+          <li>Persistance historique (Redis/SQLite)</li>
+          <li>Cron quotidien → SMS si stock bas</li>
+          <li>Multimodal : photo du tableau de bord</li>
+          <li>Migrer vers Claude Sonnet</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ Slide 9 — Conclusion ══ -->
+  <section class="slide lead" data-slide="9">
+    <svg class="bg-art" viewBox="0 0 1200 700" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
+      <radialGradient id="gc" cx="50%" cy="50%" r="45%">
+        <stop offset="0%" stop-color="#E91E8C" stop-opacity="0.2"/>
+        <stop offset="100%" stop-color="#E91E8C" stop-opacity="0"/>
+      </radialGradient>
+      <rect width="1200" height="700" fill="url(#gc)"/>
+      <circle cx="600" cy="350" r="200" fill="none" stroke="#E91E8C" stroke-width="1.5" opacity="0.2"/>
+      <circle cx="600" cy="350" r="290" fill="none" stroke="#E91E8C" stroke-width="1" opacity="0.1"/>
+      <circle cx="600" cy="350" r="380" fill="none" stroke="#E91E8C" stroke-width="0.5" opacity="0.06"/>
+      <text x="200" y="150" font-size="12" fill="#E91E8C" opacity="0.5">✦</text>
+      <text x="950" y="200" font-size="9"  fill="#FFD6E7" opacity="0.4">✦</text>
+      <text x="100" y="500" font-size="8"  fill="#E91E8C" opacity="0.35">✦</text>
+      <text x="1080" y="520" font-size="11" fill="#FFD6E7" opacity="0.3">✦</text>
+    </svg>
+    <div class="lead-content">
+      <div class="ais-logo">
+        <span class="star">✦</span>
+        <span class="ai">AI</span><span class="sis">Sisters</span>
+      </div>
+      <h1>Merci ! <span>🥐</span></h1>
+      <p class="subtitle">Des questions ?</p>
+      <p style="margin-top:1.2rem;font-size:0.95rem;color:var(--text-muted);">
+        Lancer la démo :
+        <code style="background:rgba(233,30,140,0.15);border:1px solid rgba(233,30,140,0.4);color:var(--pink-light);padding:.2em .7em;border-radius:6px;font-family:'SF Mono','Fira Code',monospace;font-size:0.9em;">chainlit run app.py</code>
+      </p>
+      <p class="tagline" style="margin-top:1.5rem;">« Moins d'admin, plus de croissants. »</p>
+    </div>
+  </section>
+
+</div>
+
+<nav class="nav-bar">
+  <button class="nav-btn" id="prev" aria-label="Slide précédente">←</button>
+  <span class="slide-counter"><span id="current">1</span> / <span id="total">9</span></span>
+  <button class="nav-btn" id="next" aria-label="Slide suivante">→</button>
+</nav>
+
+<script>
+  const slides   = document.querySelectorAll('.slide');
+  const total    = slides.length;
+  let current    = 0;
+
+  const progress  = document.getElementById('progress');
+  const currentEl = document.getElementById('current');
+  const totalEl   = document.getElementById('total');
+  const prevBtn   = document.getElementById('prev');
+  const nextBtn   = document.getElementById('next');
+
+  totalEl.textContent = total;
+
+  function goTo(i) {
+    if (i < 0 || i >= total) return;
+    slides[current].classList.remove('active');
+    slides[current].classList[i > current ? 'add' : 'remove']('prev');
+    current = i;
+    slides[current].classList.add('active');
+    slides[current].classList.remove('prev');
+    currentEl.textContent = current + 1;
+    progress.style.width = ((current + 1) / total * 100) + '%';
+    prevBtn.disabled = current === 0;
+    nextBtn.disabled = current === total - 1;
+  }
+
+  prevBtn.addEventListener('click', () => goTo(current - 1));
+  nextBtn.addEventListener('click', () => goTo(current + 1));
+
+  document.addEventListener('keydown', (e) => {
+    if (['ArrowRight', ' ', 'PageDown'].includes(e.key)) { e.preventDefault(); goTo(current + 1); }
+    else if (['ArrowLeft', 'PageUp'].includes(e.key))    { e.preventDefault(); goTo(current - 1); }
+    else if (e.key === 'Home') goTo(0);
+    else if (e.key === 'End')  goTo(total - 1);
+    else if (e.key === 'f' || e.key === 'F') {
+      if (!document.fullscreenElement) document.documentElement.requestFullscreen?.();
+      else document.exitFullscreen?.();
+    }
+  });
+
+  let touchStartX = 0;
+  document.addEventListener('touchstart', e => { touchStartX = e.changedTouches[0].screenX; });
+  document.addEventListener('touchend',   e => {
+    const d = touchStartX - e.changedTouches[0].screenX;
+    if (Math.abs(d) > 50) d > 0 ? goTo(current + 1) : goTo(current - 1);
+  });
+
+  goTo(0);
+</script>
+</body>
+</html>

@@ -1,0 +1,138 @@
+/* ============================================================
+   AI Sisters x Chez Madeleine — Design System
+   Rose clair #FFD6E7 · Fuchsia #E91E8C · Noir #0D0D0D
+   ============================================================ */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap');
+
+:root {
+  --fuchsia: #E91E8C;
+  --fuchsia-dark: #C2186F;
+  --pink-light: #FFD6E7;
+  --black: #0D0D0D;
+  --gray-dark: #111118;
+  --gray-mid: #1E1E2E;
+  --gray-card: #252535;
+}
+
+/* === FOND GLOBAL === */
+body, html, #root {
+  background-color: var(--gray-dark) !important;
+  font-family: 'Inter', sans-serif !important;
+  color: white !important;
+}
+
+/* === HEADER === */
+.p-3.flex.h-\\[60px\\] {
+  background: var(--black) !important;
+  border-bottom: 2px solid var(--fuchsia) !important;
+}
+
+/* Boutons header */
+.text-muted-foreground {
+  color: #aaa !important;
+}
+
+/* === WELCOME SCREEN (zone centrale avant les messages) === */
+.welcome-screen {
+  background: var(--gray-dark) !important;
+}
+
+/* Logo custom — remplace le logo Chainlit */
+img.logo {
+  content: url('/public/logo_dark.svg') !important;
+  width: 280px !important;
+  height: auto !important;
+  margin-bottom: 24px !important;
+}
+
+/* === ZONE DE SAISIE === */
+/* Tailwind: bg-accent dark:bg-card rounded-3xl */
+.rounded-3xl {
+  background: #1A1A2A !important;
+  border: 1.5px solid rgba(233,30,140,0.5) !important;
+  border-radius: 18px !important;
+  box-shadow: 0 0 20px rgba(233,30,140,0.08) !important;
+}
+
+#chat-input {
+  color: white !important;
+  caret-color: var(--fuchsia) !important;
+}
+
+#chat-input:focus {
+  outline: none !important;
+}
+
+/* === BOUTON ENVOYER === */
+.bg-primary {
+  background: var(--fuchsia) !important;
+  border-radius: 50% !important;
+}
+.bg-primary:hover {
+  background: var(--fuchsia-dark) !important;
+}
+.text-primary-foreground {
+  color: white !important;
+}
+
+/* === MESSAGES === */
+
+/* Message utilisateur */
+.user-message,
+[data-testid="user-message"],
+.bg-blue-500,
+.ml-auto {
+  background: linear-gradient(135deg, var(--fuchsia) 0%, var(--fuchsia-dark) 100%) !important;
+  border-radius: 18px 18px 4px 18px !important;
+  color: white !important;
+}
+
+/* Message assistant */
+.assistant-message,
+[data-testid="assistant-message"] {
+  background: var(--gray-card) !important;
+  border-left: 3px solid var(--fuchsia) !important;
+  border-radius: 18px 18px 18px 4px !important;
+  color: white !important;
+}
+
+/* Texte dans les messages */
+.prose, .prose p, .prose li, .prose span {
+  color: white !important;
+}
+
+/* === TOOL CALLS (étapes de l'agent) === */
+details summary {
+  color: var(--fuchsia) !important;
+  font-weight: 600 !important;
+}
+details {
+  background: rgba(233,30,140,0.07) !important;
+  border: 1px solid rgba(233,30,140,0.25) !important;
+  border-radius: 10px !important;
+  padding: 8px 12px !important;
+  margin-bottom: 6px !important;
+}
+
+/* === SIDEBAR === */
+aside, [class*="sidebar"] {
+  background: var(--black) !important;
+  border-right: 1px solid rgba(233,30,140,0.3) !important;
+}
+
+/* === SCROLLBAR === */
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: var(--gray-dark); }
+::-webkit-scrollbar-thumb { background: var(--fuchsia); border-radius: 3px; }
+
+/* === LIENS === */
+a { color: var(--fuchsia) !important; }
+a:hover { color: var(--pink-light) !important; }
+
+/* === MASQUER BRANDING CHAINLIT === */
+a[href*="chainlit.io"],
+a[href*="github.com/Chainlit"],
+[class*="watermark"],
+[class*="powered"] {
+  display: none !important;
+}

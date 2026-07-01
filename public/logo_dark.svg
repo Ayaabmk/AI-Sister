@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 80" width="320" height="80">
+  <!-- Fond transparent -->
+  <rect width="320" height="80" fill="transparent"/>
+
+  <!-- Étoile déco -->
+  <text x="12" y="52" font-family="Inter, Arial, sans-serif" font-size="32" fill="#E91E8C">✦</text>
+
+  <!-- "AI" en fuchsia bold -->
+  <text x="52" y="54" font-family="Inter, Arial, sans-serif" font-size="38" font-weight="800" fill="#E91E8C">AI</text>
+
+  <!-- "Sisters" en blanc -->
+  <text x="108" y="54" font-family="Inter, Arial, sans-serif" font-size="38" font-weight="700" fill="#FFFFFF">Sisters</text>
+
+  <!-- Sous-titre -->
+  <text x="52" y="72" font-family="Inter, Arial, sans-serif" font-size="13" font-weight="400" fill="#FFD6E7" letter-spacing="3">BOULANGERIE MADELEINE</text>
+</svg>
